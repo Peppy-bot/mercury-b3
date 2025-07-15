@@ -8,6 +8,7 @@ version = "0.1.0"
 [dependencies]
 python = ">=3.12,<3.13"
 ros-jazzy-desktop = ">=0.11.0,<0.12"
+ros-jazzy-rmw-zenoh-cpp = ">=0.2.3,<0.3"
 ros-jazzy-urdf = ">=2.10.0,<3"
 ros-jazzy-joint-state-publisher-gui = ">=2.4.0,<3"
 ros-jazzy-tf2-tools = ">=0.36.11,<0.37"
@@ -17,11 +18,10 @@ ninja = ">=1.13.1,<2"
 ros-jazzy-xacro = ">=2.0.13,<3"
 
 [tasks]
-ros2 = { cmd = "bash -lc 'if [ -f .colcon/install/setup.sh ]; then source .colcon/install/setup.sh; fi && ros2 \"$@\"' -- " }
-rqt_graph = { cmd = "bash -lc 'dot -c && QT_MAC_WANTS_LAYER=1 python .pixi/envs/default/lib/rqt_graph/rqt_graph'" }
+ros2 = { cmd = "bash -lc 'if [ -f .colcon/install/setup.sh ]; then source .colcon/install/setup.sh; fi && ros2 \"$@\"' -- ", depends-on = "_start_zenoh_router"}
+rqt_graph = { cmd = "bash -lc 'dot -c && QT_MAC_WANTS_LAYER=1 python .pixi/envs/default/lib/rqt_graph/rqt_graph'", depends-on = "_start_zenoh_router" }
 
-
-launch_mycobot = { cmd = "bash -c 'source .colcon/install/setup.sh && ros2 launch ./launch/mycobot.launch.xml'", depends-on = ["_kill_all_publishers", "_build_base"] }
+launch_mycobot = { cmd = "bash -c 'source .colcon/install/setup.sh && ros2 launch ./launch/mycobot.launch.xml'", depends-on = ["_start_zenoh_router", "_kill_all_publishers", "_build_base"] }
 
 # Helper to kill all ROS publishers
 _kill_all_publishers = { cmd = "bash -c 'echo \"Killing ROS publishers...\"; killall -q robot_state_publisher joint_state_publisher_gui rviz2 2>/dev/null || true; sleep 1; echo \"Done\"; exit 0'" }
@@ -29,3 +29,9 @@ _kill_all_publishers = { cmd = "bash -c 'echo \"Killing ROS publishers...\"; kil
 _build_base = { cmd = "bash -c 'cd .colcon && colcon build --cmake-args -G Ninja'", depends-on = "_link_robot_description" }
 _setup_colcon = { cmd = "mkdir -p .colcon/src" }
 _link_robot_description = { cmd = "bash -c 'rm -f .colcon/src/mycobot_description && ln -sf ../../mycobot_description .colcon/src/mycobot_description'", depends-on = "_setup_colcon" }
+
+# Zenoh works across the OSes without hanging compared to DDS
+_start_zenoh_router = "bash -lc 'if ! pgrep -f \"rmw_zenohd\" > /dev/null; then if [ -f .colcon/install/setup.sh ]; then source .colcon/install/setup.sh; fi && ros2 run rmw_zenoh_cpp rmw_zenohd & sleep 2; fi'"
+
+[activation.env]
+RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
