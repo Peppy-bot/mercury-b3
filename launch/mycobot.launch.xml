@@ -5,6 +5,6 @@
         <param name="robot_description" value="$(command 'xacro $(var urdf_path)')"/>
     </node>
 
-    <!-- <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui"/> -->
-    <!-- <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share mycobot_description)/rviz/mycobot.rviz" output="screen" /> -->
+    <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui"/>
+    <node pkg="rviz2" exec="rviz2" output="screen" />
 </launch>
