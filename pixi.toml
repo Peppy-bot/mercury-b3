@@ -20,12 +20,12 @@ ros-jazzy-xacro = ">=2.0.13,<3"
 ros2 = { cmd = "bash -lc 'if [ -f .colcon/install/setup.sh ]; then source .colcon/install/setup.sh; fi && ros2 \"$@\"' -- " }
 rqt_graph = { cmd = "bash -lc 'dot -c && QT_MAC_WANTS_LAYER=1 python .pixi/envs/default/lib/rqt_graph/rqt_graph'" }
 
-launch_mycobot = { cmd = "bash -lc 'source .colcon/install/setup.sh && ros2 launch ./launch/mycobot.launch.xml'", depends-on = ["_kill_all_publishers", "_build_base"] }
+
+launch_mycobot = { cmd = "bash -c 'source .colcon/install/setup.sh && ros2 launch ./launch/mycobot.launch.xml'", depends-on = ["_kill_all_publishers", "_build_base"] }
 
 # Helper to kill all ROS publishers
-_kill_all_publishers = "bash -lc 'pkill -f robot_state_publisher || true; pkill -f joint_state_publisher || true; pkill -f rviz2 || true; pkill -f \"ros2 run robot_state_publisher\" || true; pkill -f \"ros2 run joint_state_publisher\" || true; pkill -f \"ros2 run rviz2\" || true; pkill -f \"ros2 launch\" || true; sleep 1'"
+_kill_all_publishers = { cmd = "bash -c 'echo \"Killing ROS publishers...\"; killall -q robot_state_publisher joint_state_publisher_gui rviz2 2>/dev/null || true; sleep 1; echo \"Done\"; exit 0'" }
 # Build the package
-_build_base = { cmd = "bash -lc 'cd .colcon && colcon build --cmake-args -G Ninja'", depends-on = "_link_robot_description" }
+_build_base = { cmd = "bash -c 'cd .colcon && colcon build --cmake-args -G Ninja'", depends-on = "_link_robot_description" }
 _setup_colcon = { cmd = "mkdir -p .colcon/src" }
-_link_robot_description = { cmd = "bash -lc 'rm -f .colcon/src/mycobot_description && ln -sf ../../mycobot_description .colcon/src/mycobot_description'", depends-on = "_setup_colcon" }
-
+_link_robot_description = { cmd = "bash -c 'rm -f .colcon/src/mycobot_description && ln -sf ../../mycobot_description .colcon/src/mycobot_description'", depends-on = "_setup_colcon" }
