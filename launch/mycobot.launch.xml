@@ -6,5 +6,5 @@
     </node>
 
     <node pkg="joint_state_publisher_gui" exec="joint_state_publisher_gui"/>
-    <node pkg="rviz2" exec="rviz2" output="screen" />
+    <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share mycobot_description)/rviz/mycobot.rviz" output="screen" />
 </launch>
