@@ -1,0 +1,28 @@
+[workspace]
+authors = ["Tuatini <email@tuatini.me>"]
+channels = ["robostack-jazzy", "conda-forge"]
+name = "mercury-b3"
+platforms = ["linux-64", "linux-aarch64", "osx-arm64"]
+version = "0.1.0"
+
+[dependencies]
+python = ">=3.12,<3.13"
+ros-jazzy-desktop = ">=0.11.0,<0.12"
+ros-jazzy-urdf = ">=2.10.0,<3"
+ros-jazzy-joint-state-publisher-gui = ">=2.4.0,<3"
+ros-jazzy-tf2-tools = ">=0.36.11,<0.37"
+ros-jazzy-rqt-graph = ">=1.5.0,<2"
+colcon-common-extensions = ">=0.3"
+ninja = ">=1.13.1,<2"
+ros-jazzy-xacro = ">=2.0.13,<3"
+
+[tasks]
+ros2 = { cmd = "bash -lc 'if [ -f .colcon/install/setup.sh ]; then source .colcon/install/setup.sh; fi && ros2 \"$@\"' -- " }
+rqt_graph = { cmd = "bash -lc 'dot -c && QT_MAC_WANTS_LAYER=1 python .pixi/envs/default/lib/rqt_graph/rqt_graph'" }
+
+launch_mycobot = { cmd = "bash -lc 'source .colcon/install/setup.sh && ros2 launch ./launch/mycobot.launch.xml'", depends-on = ["_kill_all_publishers", "_build_base"] }
+
+# Helper to kill all ROS publishers
+_kill_all_publishers = "bash -lc 'pkill -f robot_state_publisher || true; pkill -f joint_state_publisher || true; pkill -f rviz2 || true; pkill -f \"ros2 run robot_state_publisher\" || true; pkill -f \"ros2 run joint_state_publisher\" || true; pkill -f \"ros2 run rviz2\" || true; pkill -f \"ros2 launch\" || true; sleep 1'"
+# Build the package
+_build_base = "bash -lc 'mkdir -p .colcon && cd .colcon && colcon build --cmake-args -G Ninja'"
