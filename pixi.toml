@@ -31,7 +31,7 @@ _setup_colcon = { cmd = "mkdir -p .colcon/src" }
 _link_robot_description = { cmd = "bash -c 'rm -f .colcon/src/mycobot_description && ln -sf ../../mycobot_description .colcon/src/mycobot_description'", depends-on = "_setup_colcon" }
 
 # Zenoh works across the OSes without hanging compared to DDS
-_start_zenoh_router = "bash -lc 'if ! pgrep -f \"rmw_zenohd\" > /dev/null; then if [ -f .colcon/install/setup.sh ]; then source .colcon/install/setup.sh; fi && ros2 run rmw_zenoh_cpp rmw_zenohd & sleep 2; fi'"
+_start_zenoh_router = "bash -lc 'if ! pgrep -x \"rmw_zenohd\" > /dev/null; then if [ -f .colcon/install/setup.sh ]; then source .colcon/install/setup.sh; fi && ros2 run rmw_zenoh_cpp rmw_zenohd & sleep 2; fi'"
 
 [activation.env]
 RMW_IMPLEMENTATION = "rmw_zenoh_cpp"
